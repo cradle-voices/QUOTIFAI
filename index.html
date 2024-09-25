@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUOTIFAI</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.11/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="bg-gray-100 p-10">
+
+<div class="container mx-auto bg-white p-5 rounded shadow">
+    <h1 class="text-2xl font-bold mb-4">QUOTIFAI</h1>
+    
+    <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+            <label class="block mb-2">REINSURED</label>
+            <input type="text" class="border border-gray-300 p-2 w-full" value="FIRST ASSURANCE" >
+        </div>
+        <div>
+            <label class="block mb-2">BROKER</label>
+            <input type="text" class="border border-gray-300 p-2 w-full" value="RSI" >
+        </div>
+        <div>
+            <label class="block mb-2">INSURED</label>
+            <input type="text" class="border border-gray-300 p-2 w-full" value="FEKAN HOWELL" >
+        </div>
+    </div>
+
+    <h2 class="text-lg font-semibold mt-4">Details</h2>
+    <table class="min-w-full border-collapse border border-gray-300 mt-4">
+        <thead>
+            <tr>
+                <th class="border border-gray-300 p-2">NAME</th>
+                <th class="border border-gray-300 p-2">NUM</th>
+                <th class="border border-gray-300 p-2">AMOUNT</th>
+                <th class="border border-gray-300 p-2">TOTAL</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="border border-gray-300 p-2">Partners/Principal</td>
+                <td class="border border-gray-300 p-2">
+                    <input type="number" id="partnersNum" class="border border-gray-300 p-1 w-full" onchange="calculatePremium()">
+                </td>
+                <td class="border border-gray-300 p-2">
+                    <input type="number" id="partnersAmount" class="border border-gray-300 p-1 w-full" onchange="calculatePremium()">
+                </td>
+                <td class="border border-gray-300 p-2">
+                    <span id="partnersTotal">0.00</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="border border-gray-300 p-2">Qualified Assistants</td>
+                <td class="border border-gray-300 p-2">
+                    <input type="number" id="assistantsNum" class="border border-gray-300 p-1 w-full" onchange="calculatePremium()">
+                </td>
+                <td class="border border-gray-300 p-2">
+                    <input type="number" id="assistantsAmount" class="border border-gray-300 p-1 w-full" onchange="calculatePremium()">
+                </td>
+                <td class="border border-gray-300 p-2">
+                    <span id="assistantsTotal">0.00</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="border border-gray-300 p-2">Unqualified Assistants</td>
+                <td class="border border-gray-300 p-2">
+                    <input type="number" id="unqualifiedNum" class="border border-gray-300 p-1 w-full" onchange="calculatePremium()">
+                </td>
+                <td class="border border-gray-300 p-2">
+                    <input type="number" id="unqualifiedAmount" class="border border-gray-300 p-1 w-full" onchange="calculatePremium()">
+                </td>
+                <td class="border border-gray-300 p-2">
+                    <span id="unqualifiedTotal">0.00</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="border border-gray-300 p-2">Annual fees</td>
+                <td class="border border-gray-300 p-2" colspan="2">
+                    <input type="number" id="annualFees" class="border border-gray-300 p-1 w-full" onchange="calculatePremium()">
+                </td>
+                <td class="border border-gray-300 p-2">
+                    <span id="annualFeesTotal">0.00</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2 class="text-lg font-semibold mt-4">Calculated Totals</h2>
+    <div class="mb-4">
+        <p>Limit of indemnity: 
+            <input type="number" id="limitIndemnity" class="border border-gray-300 p-1 w-full mt-1" onchange="calculatePremium()">
+            <span id="limitIndemnityTotal">0.00</span>
+        </p>
+        <p>Loss of Documents (10% of LOI): <span id="lossOfDocuments">0.00</span></p>
+        <p>Libel & Slander (10% of LOI): <span id="libelAndSlander">0.00</span></p>
+        <p>Dishonest Employees (10% of LOI): <span id="dishonestEmployees">0.00</span></p>
+        <p>Basic Premium Total: <span id="basicPremiumTotal">0.00</span></p>
+        <p>Levies: 
+            <input type="number" id="levies" class="border border-gray-300 p-1 w-full mt-1" onchange="calculatePremium()">
+            <span>0.00</span>
+        </p>
+        <p>SD: 
+            <input type="number" id="sd" class="border border-gray-300 p-1 w-full mt-1" onchange="calculatePremium()">
+            <span>0.00</span>
+        </p>
+        <p>Total Premium: <span id="totalPremium">0.00</span></p>
+    </div>
+
+    <button onclick="generatePDF()" class="bg-blue-500 text-white p-2 rounded">Generate PDF</button>
+</div>
+
+<script>
+    function calculatePremium() {
+        const partnersNum = parseFloat(document.getElementById('partnersNum').value) || 0;
+        const partnersAmount = parseFloat(document.getElementById('partnersAmount').value) || 0;
+        const assistantsNum = parseFloat(document.getElementById('assistantsNum').value) || 0;
+        const assistantsAmount = parseFloat(document.getElementById('assistantsAmount').value) || 0;
+        const unqualifiedNum = parseFloat(document.getElementById('unqualifiedNum').value) || 0;
+        const unqualifiedAmount = parseFloat(document.getElementById('unqualifiedAmount').value) || 0;
+        const annualFees = parseFloat(document.getElementById('annualFees').value) || 0;
+        const limitIndemnity = parseFloat(document.getElementById('limitIndemnity').value) || 0;
+        const levies = parseFloat(document.getElementById('levies').value) || 0;
+        const sd = parseFloat(document.getElementById('sd').value) || 0;
+
+        const partnersTotal = partnersNum * partnersAmount;
+        const assistantsTotal = assistantsNum * assistantsAmount;
+        const unqualifiedTotal = unqualifiedNum * unqualifiedAmount;
+        const annualFeesTotal = annualFees;
+        const limitIndemnityTotal = limitIndemnity;
+
+        // Calculate premiums based on LOI (Limit of Indemnity)
+        const lossOfDocuments = (10 / 100) * limitIndemnity;
+        const libelAndSlander = (10 / 100) * limitIndemnity;
+        const dishonestEmployees = (10 / 100) * limitIndemnity;
+
+        document.getElementById('partnersTotal').innerText = partnersTotal.toFixed(2);
+        document.getElementById('assistantsTotal').innerText = assistantsTotal.toFixed(2);
+        document.getElementById('unqualifiedTotal').innerText = unqualifiedTotal.toFixed(2);
+        document.getElementById('annualFeesTotal').innerText = annualFeesTotal.toFixed(2);
+        document.getElementById('limitIndemnityTotal').innerText = limitIndemnityTotal.toFixed(2);
+        
+        // Set loss of documents, libel and slander, and dishonest employees
+        document.getElementById('lossOfDocuments').innerText = lossOfDocuments.toFixed(2);
+        document.getElementById('libelAndSlander').innerText = libelAndSlander.toFixed(2);
+        document.getElementById('dishonestEmployees').innerText = dishonestEmployees.toFixed(2);
+
+        // Calculate total premium
+        const basicPremiumTotal = partnersTotal + assistantsTotal + unqualifiedTotal + annualFeesTotal + lossOfDocuments + libelAndSlander + dishonestEmployees;
+        const totalPremium = basicPremiumTotal + levies + sd;
+
+        document.getElementById('basicPremiumTotal').innerText = basicPremiumTotal.toFixed(2);
+        document.getElementById('totalPremium').innerText = totalPremium.toFixed(2);
+    }
+
+    function generatePDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const title = "Professional Indemnity Quotation";
+        doc.text(title, 10, 10);
+        // Add other content to PDF
+        doc.save('quotation.pdf');
+    }
+</script>
+
+</body>
+</html>
